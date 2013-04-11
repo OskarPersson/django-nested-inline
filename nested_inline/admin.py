@@ -8,7 +8,7 @@ from django.utils.encoding import force_unicode
 from django.views.decorators.csrf import csrf_protect
 from django.utils.translation import ugettext as _
 from django.contrib.admin.util import unquote
-from django.db import transaction
+from django.db import transaction, models
 from django.utils.html import escape
 from django.conf import settings
 from django import forms
