@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import helpers
+from django.contrib.admin.options import reverse
 from django.core.exceptions import PermissionDenied
 from django.forms.formsets import all_valid
 from django.http import Http404
@@ -24,7 +25,7 @@ class NestedModelAdmin(admin.ModelAdmin):
         }
         js = ('/static/admin/js/inlines-nested.js',)
 
-    def save_formset(self, request, formset, change):
+    def save_formset(self, request, form, formset, change):
         """
         Given an inline formset save it to the database.
         """
@@ -33,7 +34,7 @@ class NestedModelAdmin(admin.ModelAdmin):
         for form in formset.forms:
             if hasattr(form, 'nested_formsets') and form not in formset.deleted_forms:
                 for nested_formset in form.nested_formsets:
-                    self.save_formset(request, nested_formset, change)
+                    self.save_formset(request, form, nested_formset, change)
 
     def save_related(self, request, form, formsets, change):
         """
@@ -45,8 +46,7 @@ class NestedModelAdmin(admin.ModelAdmin):
         """
         form.save_m2m()
         for formset in formsets:
-            self.save_formset(request, formset, change=change)
-
+            self.save_formset(request, form, formset, change=change)
 
     def add_nested_inline_formsets(self, request, inline, formset, depth=0):
         if depth > 5:
@@ -56,10 +56,15 @@ class NestedModelAdmin(admin.ModelAdmin):
             for nested_inline in inline.get_inline_instances(request):
                 InlineFormSet = nested_inline.get_formset(request, form.instance)
                 prefix = "%s-%s" % (form.prefix, InlineFormSet.get_default_prefix())
-                if request.method == 'POST':
-                    nested_formset = InlineFormSet(request.POST, request.FILES,
-                        instance=form.instance,
-                        prefix=prefix, queryset=nested_inline.queryset(request))
+
+                if request.method == 'POST' and any(s.startswith(prefix) for s in request.POST.keys()):
+                    try:
+                        nested_formset = InlineFormSet(request.POST, request.FILES,
+                            instance=form.instance,
+                            prefix=prefix, queryset=nested_inline.queryset(request))
+                    except ValueError:
+                        nested_formset = InlineFormSet(instance=form.instance,
+                            prefix=prefix, queryset=nested_inline.queryset(request))
                 else:
                     nested_formset = InlineFormSet(instance=form.instance,
                         prefix=prefix, queryset=nested_inline.queryset(request))
@@ -67,7 +72,6 @@ class NestedModelAdmin(admin.ModelAdmin):
                 if nested_inline.inlines:
                     self.add_nested_inline_formsets(request, nested_inline, nested_formset, depth=depth+1)
             form.nested_formsets = nested_formsets
-
 
     def wrap_nested_inline_formsets(self, request, inline, formset):
         media = None
@@ -113,7 +117,6 @@ class NestedModelAdmin(admin.ModelAdmin):
                         return False
         return True
 
-
     @csrf_protect_m
     @transaction.commit_on_success
     def add_view(self, request, form_url='', extra_context=None):
@@ -126,7 +129,7 @@ class NestedModelAdmin(admin.ModelAdmin):
 
         ModelForm = self.get_form(request)
         formsets = []
-        inline_instances = self.get_inline_instances(request)
+        inline_instances = self.get_inline_instances(request, None)
         if request.method == 'POST':
             form = ModelForm(request.POST, request.FILES)
             if form.is_valid():
@@ -208,7 +211,6 @@ class NestedModelAdmin(admin.ModelAdmin):
         context.update(extra_context or {})
         return self.render_change_form(request, context, form_url=form_url, add=True)
 
-
     @csrf_protect_m
     @transaction.commit_on_success
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -231,7 +233,7 @@ class NestedModelAdmin(admin.ModelAdmin):
 
         ModelForm = self.get_form(request, obj)
         formsets = []
-        inline_instances = self.get_inline_instances(request)
+        inline_instances = self.get_inline_instances(request, obj)
         if request.method == 'POST':
             form = ModelForm(request.POST, request.FILES, instance=obj)
             if form.is_valid():
@@ -249,13 +251,11 @@ class NestedModelAdmin(admin.ModelAdmin):
                 formset = FormSet(request.POST, request.FILES,
                     instance=new_object, prefix=prefix,
                     queryset=inline.queryset(request))
-
                 formsets.append(formset)
-
                 if inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
 
-            if all_valid(formsets) and form_validated:
+            if self.all_valid_with_nesting(formsets) and form_validated:
                 self.save_model(request, new_object, form, True)
                 self.save_related(request, form, formsets, True)
                 change_message = self.construct_change_message(request, form, formsets)
@@ -309,6 +309,7 @@ class NestedModelAdmin(admin.ModelAdmin):
         return self.render_change_form(request, context, change=True, obj=obj, form_url=form_url)
 
 
+
 class NestedInline(admin.StackedInline):
     inlines = []
     new_objects = []
@@ -323,19 +324,24 @@ class NestedInline(admin.StackedInline):
             js.extend(['SelectBox.js', 'SelectFilter2.js'])
         return forms.Media(js=[static('admin/js/%s' % url) for url in js])
 
-    def get_inline_instances(self, request):
+    def get_inline_instances(self, request, obj=None):
         inline_instances = []
         for inline_class in self.inlines:
             inline = inline_class(self.model, self.admin_site)
             if request:
                 if not (inline.has_add_permission(request) or
-                        inline.has_change_permission(request) or
-                        inline.has_delete_permission(request)):
+                        inline.has_change_permission(request, obj) or
+                        inline.has_delete_permission(request, obj)):
                     continue
                 if not inline.has_add_permission(request):
                     inline.max_num = 0
             inline_instances.append(inline)
+
         return inline_instances
+
+    def get_formsets(self, request, obj=None):
+        for inline in self.get_inline_instances(request):
+            yield inline.get_formset(request, obj)
 
 
 class NestedStackedInline(NestedInline):
