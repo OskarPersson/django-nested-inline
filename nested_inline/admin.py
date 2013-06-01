@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import helpers
-from django.contrib.admin.options import reverse
+from django.contrib.admin.options import reverse, InlineModelAdmin
 from django.core.exceptions import PermissionDenied
 from django.forms.formsets import all_valid
 from django.http import Http404
@@ -24,6 +24,21 @@ class NestedModelAdmin(admin.ModelAdmin):
             "all": ('/static/admin/css/forms-nested.css',)
         }
         js = ('/static/admin/js/inlines-nested.js',)
+
+    def get_inline_instances(self, request, obj=None):
+        inline_instances = []
+        for inline_class in self.inlines:
+            inline = inline_class(self.model, self.admin_site)
+            if request:
+                if not (inline.has_add_permission(request) or
+                        inline.has_change_permission(request, obj) or
+                        inline.has_delete_permission(request, obj)):
+                    continue
+                if not inline.has_add_permission(request):
+                    inline.max_num = 0
+            inline_instances.append(inline)
+
+        return inline_instances
 
     def save_formset(self, request, form, formset, change):
         """
@@ -310,7 +325,7 @@ class NestedModelAdmin(admin.ModelAdmin):
 
 
 
-class NestedInline(admin.StackedInline):
+class NestedInline(InlineModelAdmin):
     inlines = []
     new_objects = []
 
