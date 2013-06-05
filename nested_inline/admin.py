@@ -17,6 +17,7 @@ from django.contrib.admin.templatetags.admin_static import static
 
 csrf_protect_m = method_decorator(csrf_protect)
 
+
 class NestedModelAdmin(admin.ModelAdmin):
 
     class Media:
@@ -73,13 +74,9 @@ class NestedModelAdmin(admin.ModelAdmin):
                 prefix = "%s-%s" % (form.prefix, InlineFormSet.get_default_prefix())
 
                 if request.method == 'POST' and any(s.startswith(prefix) for s in request.POST.keys()):
-                    try:
-                        nested_formset = InlineFormSet(request.POST, request.FILES,
-                            instance=form.instance,
-                            prefix=prefix, queryset=nested_inline.queryset(request))
-                    except ValueError:
-                        nested_formset = InlineFormSet(instance=form.instance,
-                            prefix=prefix, queryset=nested_inline.queryset(request))
+                    nested_formset = InlineFormSet(request.POST, request.FILES,
+                        instance=form.instance,
+                        prefix=prefix, queryset=nested_inline.queryset(request))
                 else:
                     nested_formset = InlineFormSet(instance=form.instance,
                         prefix=prefix, queryset=nested_inline.queryset(request))
@@ -115,10 +112,23 @@ class NestedModelAdmin(admin.ModelAdmin):
             form.nested_formsets = wrapped_nested_formsets
         return media
 
+    def formset_has_nested_data(self, formsets):
+        for formset in formsets:
+            if not formset.is_bound:
+                pass
+            for form in formset:
+                if hasattr(form, 'cleaned_data') and form.cleaned_data:
+                    return True
+                elif hasattr(form, 'nested_formsets'):
+                    if self.formset_has_nested_data(form.nested_formsets):
+                        return True
+
+
     def all_valid_with_nesting(self, formsets):
         "Recursively validate all nested formsets"
         if not all_valid(formsets):
             return False
+
         for formset in formsets:
             if not formset.is_bound:
                 pass
@@ -126,8 +136,9 @@ class NestedModelAdmin(admin.ModelAdmin):
                 if hasattr(form, 'nested_formsets'):
                     if not self.all_valid_with_nesting(form.nested_formsets):
                         return False
+
                     #TODO - find out why this breaks when extra = 1 and just adding new item with no sub items
-                    if not hasattr(form, 'cleaned_data'):
+                    if (not hasattr(form, 'cleaned_data') or not form.cleaned_data) and self.formset_has_nested_data(form.nested_formsets):
                         form._errors["__all__"] = form.error_class([u"Parent object must be created when creating nested inlines."])
                         return False
         return True
@@ -331,7 +342,7 @@ class NestedInline(InlineModelAdmin):
 
     @property
     def media(self):
-        extra = '' if settings.DEBUG else '.min'
+        extra = '' if False and settings.DEBUG else '.min'
         js = ['jquery%s.js' % extra, 'jquery.init.js', 'inlines-nested%s.js' % extra]
         if self.prepopulated_fields:
             js.extend(['urlify.js', 'prepopulate%s.js' % extra])
@@ -351,7 +362,6 @@ class NestedInline(InlineModelAdmin):
                 if not inline.has_add_permission(request):
                     inline.max_num = 0
             inline_instances.append(inline)
-
         return inline_instances
 
     def get_formsets(self, request, obj=None):

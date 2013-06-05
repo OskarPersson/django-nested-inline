@@ -287,6 +287,7 @@
         var normalized_parent_formset_prefix = parent_formset_prefix.replace(/[-][0-9][-]/g, "-0-");
         // Check if the form should have nested formsets
         var nested_inlines = $('#' + normalized_parent_formset_prefix + "-group ." + normalized_parent_formset_prefix + "-nested-inline").not('.cloned').first();
+
         nested_inlines.each(function() {
             // prefixes for the nested formset
             var normalized_formset_prefix = $(this).attr('id').split('-group')[0];
@@ -303,10 +304,21 @@
                 // Make a new form
                 template_form = template.find("#" + normalized_formset_prefix + "-empty")
                 new_form = template_form.clone().removeClass(options.emptyCssClass).addClass("dynamic-" + formset_prefix);
+
                 new_form.insertBefore(template_form);
+
+                var inputs = new_form.find('input');
+                inputs.each(function () {
+                    var $input = $(this)
+                    if ($input.val()) {
+                        $input.removeAttr('value')
+                    }
+                });
+
                 // Update Form Properties
-                template.find('#id_' + formset_prefix + '-TOTAL_FORMS').val(1);
                 update_props(template, normalized_formset_prefix, formset_prefix);
+                template.find('#id_' + formset_prefix + '-TOTAL_FORMS').val(1);
+                template.find('#id_' + formset_prefix + '-INITIAL_FORMS').val(0);
                 var add_text = template.find('.add-row').text();
                 template.find('.add-row').remove();
                 template.find('.tabular.inline-related tbody tr.' + formset_prefix + '-not-nested').tabularFormset({
@@ -339,11 +351,23 @@
                 // Make a new form
                 template_form = template.find("#" + normalized_formset_prefix + "-empty")
                 new_form = template_form.clone().removeClass(options.emptyCssClass).addClass("dynamic-" + formset_prefix);
+
                 new_form.insertBefore(template_form);
+
+                var inputs = new_form.find('input');
+                inputs.each(function () {
+                    var $input = $(this)
+                    if ($input.val()) {
+                        $input.removeAttr('value')
+                    }
+                });
+
                 // Update Form Properties
-                template.find('#id_' + normalized_formset_prefix + '-TOTAL_FORMS').val(1);
                 new_form.find('.inline_label').text('#1');
                 update_props(template, normalized_formset_prefix, formset_prefix);
+                template.find('#id_' + formset_prefix + '-TOTAL_FORMS').val(1);
+                template.find('#id_' + formset_prefix + '-INITIAL_FORMS').val(0);
+
                 var add_text = template.find('.add-row').text();
                 template.find('.add-row').remove();
                 template.find(".inline-related").stackedFormset({
