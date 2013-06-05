@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from chained_selectbox import __version__
+from nested_inline import __version__
 
 github_url = 'https://github.com/s-block/django-nested-inline'
 long_desc = open('README.md').read()
