@@ -5,11 +5,16 @@ Nested inline support for Django admin
 
 Most of the code from this package is from [https://code.djangoproject.com/ticket/9025](https://code.djangoproject.com/ticket/9025)
 
+Github
+------
+
+[https://github.com/s-block/django-nested-inline](https://github.com/s-block/django-nested-inline)
+
 
 Installation
 ------------
 
-pip install -e git+git://github.com/s-block/django-nested-inline.git#egg=django-nested-inline
+pip install django-nested-inline
 
 
 Usage
