@@ -22,9 +22,9 @@ class NestedModelAdmin(admin.ModelAdmin):
 
     class Media:
         css = {
-            "all": ('/static/admin/css/forms-nested.css',)
+            "all": ('admin/css/forms-nested.css',)
         }
-        js = ('/static/admin/js/inlines-nested.js',)
+        js = ('admin/js/inlines-nested.js',)
 
     def get_inline_instances(self, request, obj=None):
         inline_instances = []
