@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: django-nested-inline
-Version: 0.2.1
+Version: 0.2.2
 Summary: Recursive nesting of inline forms for Django Admin
 Home-page: https://github.com/s-block/django-nested-inline
 Author: Josh Rowe
