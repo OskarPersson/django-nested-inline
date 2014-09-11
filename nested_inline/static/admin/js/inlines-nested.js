@@ -286,16 +286,18 @@
         // Normalize prefix to something we can rely on
         var normalized_parent_formset_prefix = parent_formset_prefix.replace(/[-][0-9][-]/g, "-0-");
         // Check if the form should have nested formsets
-        var nested_inlines = $('#' + normalized_parent_formset_prefix + "-group ." + normalized_parent_formset_prefix + "-nested-inline").not('.cloned').first();
-
-        nested_inlines.each(function() {
+        var nested_inlines = $('#' + normalized_parent_formset_prefix + "-group ." + normalized_parent_formset_prefix + "-0-nested-inline").not('.cloned');
+        if (!nested_inlines.length) {
+          nested_inlines = $('#' + normalized_parent_formset_prefix + "-group ." + normalized_parent_formset_prefix + "-nested-inline").not('.cloned');
+        }
+        nested_inlines.each(function(key, formsetToClone) {
             // prefixes for the nested formset
             var normalized_formset_prefix = $(this).attr('id').split('-group')[0];
-            // = "parent_formset_prefix"-0-"nested_inline_name"_set
             var formset_prefix = normalized_formset_prefix.replace(normalized_parent_formset_prefix + "-0", parent_formset_prefix + "-" + next_form_id);
-            // = "parent_formset_prefix"-"next_form_id"-"nested_inline_name"_set
             // Find the normalized formset and clone it
-            var template = $("#" + normalized_formset_prefix + "-group").clone();
+            // I have changed the line below which seems to work better
+            //var template = $("#" + normalized_formset_prefix + "-group").clone();
+            var template = $(formsetToClone).clone();
             template.addClass('cloned');
             if (template.children().first().hasClass('tabular')) {
                 // Template is tabular
@@ -411,6 +413,7 @@
         });
         // fix __prefix__ where needed
         prefix_fix = template.find(".inline-related").first();
+
         nextIndex = get_no_forms(formset_prefix);
         if (prefix_fix.hasClass('tabular')) {
             // tabular

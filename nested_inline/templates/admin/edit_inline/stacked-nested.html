@@ -1,5 +1,5 @@
 {% load i18n admin_static %}
-<div class="inline-group{% if recursive_formset %} {{ recursive_formset.formset.prefix|default:"Root" }}-nested-inline nested-inline{% endif %}" id="{{ inline_admin_formset.formset.prefix }}-group">
+<div class="inline-group{% if recursive_formset %} {{ recursive_formset.formset.prefix|default:"Root" }}-nested-inline {% if prev_prefix %} {{ prev_prefix }}-{{ loopCounter }}-nested-inline{% endif %} nested-inline{% endif %}" id="{{ inline_admin_formset.formset.prefix }}-group">
 {% with recursive_formset=inline_admin_formset stacked_template='admin/edit_inline/stacked-nested.html' tabular_template='admin/edit_inline/tabular-nested.html'%}
   <h2>{{ recursive_formset.opts.verbose_name_plural|title }}</h2>
 {{ recursive_formset.formset.management_form }}
@@ -19,9 +19,9 @@
   {% if inline_admin_form.form.nested_formsets %}
     {% for inline_admin_formset in inline_admin_form.form.nested_formsets %}
       {% if inline_admin_formset.opts.template == stacked_template %}
-        {% include stacked_template %}
+        {% include stacked_template with prev_prefix=recursive_formset.formset.prefix loopCounter=forloop.parentloop.counter0 %}
       {% else %}
-        {% include tabular_template %}
+        {% include tabular_template with prev_prefix=recursive_formset.formset.prefix loopCounter=forloop.parentloop.counter0 %}
       {% endif %}
       <div class="nested-inline-bottom-border"></div>
     {% endfor %}
