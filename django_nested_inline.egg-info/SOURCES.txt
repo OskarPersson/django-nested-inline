@@ -11,3 +11,8 @@ example/admin.py
 example/models.py
 nested_inline/__init__.py
 nested_inline/admin.py
+nested_inline/static/admin/css/forms-nested.css
+nested_inline/static/admin/js/inlines-nested.js
+nested_inline/static/admin/js/inlines-nested.min.js
+nested_inline/templates/admin/edit_inline/stacked-nested.html
+nested_inline/templates/admin/edit_inline/tabular-nested.html
