@@ -1,6 +1,6 @@
 {% load i18n admin_static admin_modify %}
-{% with recursive_formset=inline_admin_formset stacked_template='admin/edit_inline/stacked-nested.html' tabular_template='admin/edit_inline/tabular-nested.html'%}
 <div class="inline-group{% if recursive_formset %} {{ recursive_formset.formset.prefix|default:"Root" }}-nested-inline{% if prev_prefix %} {{ prev_prefix }}-{{ loopCounter }}-nested-inline{% endif %} nested-inline{% endif %}" id="{{ inline_admin_formset.formset.prefix }}-group">
+{% with recursive_formset=inline_admin_formset stacked_template='admin/edit_inline/stacked-nested.html' tabular_template='admin/edit_inline/tabular-nested.html'%}
   <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}" id="{{ recursive_formset.formset.prefix }}">
 {{ recursive_formset.formset.management_form }}
 <fieldset class="module">
