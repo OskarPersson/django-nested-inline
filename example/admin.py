@@ -1,6 +1,6 @@
 from django.contrib import admin
 from nested_inline.admin import NestedStackedInline, NestedModelAdmin
-from test_project.models import *
+from example.models import *
 
 class LevelThreeInline(NestedStackedInline):
     model = LevelThree
