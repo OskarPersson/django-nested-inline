@@ -203,7 +203,7 @@ class NestedModelAdmin(admin.ModelAdmin):
                 formset = FormSet(instance=self.model(), prefix=prefix,
                     queryset=inline.queryset(request))
                 formsets.append(formset)
-                if hasattr(inline, 'inlines'):
+                if hasattr(inline, 'inlines') and inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
 
         adminForm = helpers.AdminForm(form, list(self.get_fieldsets(request)),
@@ -221,7 +221,7 @@ class NestedModelAdmin(admin.ModelAdmin):
                 fieldsets, prepopulated, readonly, model_admin=self)
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
-            if hasattr(inline, 'inlines'):
+            if hasattr(inline, 'inlines') and inline.inlines:
                 media += self.wrap_nested_inline_formsets(request, inline, formset)
 
         context = {
@@ -278,7 +278,7 @@ class NestedModelAdmin(admin.ModelAdmin):
                     instance=new_object, prefix=prefix,
                     queryset=inline.queryset(request))
                 formsets.append(formset)
-                if hasattr(inline, 'inlines'):
+                if hasattr(inline, 'inlines') and inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
 
             if self.all_valid_with_nesting(formsets) and form_validated:
@@ -299,7 +299,7 @@ class NestedModelAdmin(admin.ModelAdmin):
                 formset = FormSet(instance=obj, prefix=prefix,
                     queryset=inline.queryset(request))
                 formsets.append(formset)
-                if hasattr(inline, 'inlines'):
+                if hasattr(inline, 'inlines') and inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
 
         adminForm = helpers.AdminForm(form, self.get_fieldsets(request, obj),
@@ -317,7 +317,7 @@ class NestedModelAdmin(admin.ModelAdmin):
                 fieldsets, prepopulated, readonly, model_admin=self)
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
-            if hasattr(inline, 'inlines'):
+            if hasattr(inline, 'inlines') and inline.inlines:
                 media += self.wrap_nested_inline_formsets(request, inline, formset)
 
         context = {
