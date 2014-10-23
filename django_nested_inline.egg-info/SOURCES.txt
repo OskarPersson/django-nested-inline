@@ -1,6 +1,6 @@
 LICENSE
 MANIFEST.in
-README
+README.md
 setup.py
 django_nested_inline.egg-info/PKG-INFO
 django_nested_inline.egg-info/SOURCES.txt

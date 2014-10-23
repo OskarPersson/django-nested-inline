@@ -74,3 +74,9 @@ admin.py
 
     admin.site.register(TopLevel, TopLevelAdmin)
 
+
+
+Changelist
+----------
+
+0.3.3 - fixed bug where inlines without inlines would cause an error

@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 from nested_inline import __version__
 
 github_url = 'https://github.com/s-block/django-nested-inline'
-long_desc = open('README').read()
+long_desc = open('README.md').read()
 
 setup(
     name='django-nested-inline',

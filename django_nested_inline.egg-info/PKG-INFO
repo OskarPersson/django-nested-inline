@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: django-nested-inline
-Version: 0.3.2
+Version: 0.3.3
 Summary: Recursive nesting of inline forms for Django Admin
 Home-page: https://github.com/s-block/django-nested-inline
 Author: Josh Rowe
@@ -53,7 +53,7 @@ Description: django-nested-inline
         
             from django.contrib import admin
             from nested_inline.admin import NestedStackedInline, NestedModelAdmin
-            from test_project.models import *
+            from example.models import *
         
             class LevelThreeInline(NestedStackedInline):
                 model = LevelThree
@@ -82,6 +82,12 @@ Description: django-nested-inline
         
             admin.site.register(TopLevel, TopLevelAdmin)
         
+        
+        
+        Changelist
+        ----------
+        
+        0.3.3 - fixed bug where inlines without inlines would cause an error
         
 Platform: UNKNOWN
 Classifier: Development Status :: 4 - Beta
