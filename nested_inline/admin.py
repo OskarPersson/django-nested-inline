@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.forms.formsets import all_valid
 from django.http import Http404
 from django.utils.decorators import method_decorator
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.views.decorators.csrf import csrf_protect
 from django.utils.translation import ugettext as _
 from django.contrib.admin.util import unquote
@@ -144,7 +144,7 @@ class NestedModelAdmin(admin.ModelAdmin):
         return True
 
     @csrf_protect_m
-    @transaction.commit_on_success
+    @transaction.atomic
     def add_view(self, request, form_url='', extra_context=None):
         "The 'add' admin view for this model."
         model = self.model
@@ -225,7 +225,7 @@ class NestedModelAdmin(admin.ModelAdmin):
                 media += self.wrap_nested_inline_formsets(request, inline, formset)
 
         context = {
-            'title': _('Add %s') % force_unicode(opts.verbose_name),
+            'title': _('Add %s') % force_text(opts.verbose_name),
             'adminform': adminForm,
             'is_popup': "_popup" in request.REQUEST,
             'show_delete': False,
@@ -238,7 +238,7 @@ class NestedModelAdmin(admin.ModelAdmin):
         return self.render_change_form(request, context, form_url=form_url, add=True)
 
     @csrf_protect_m
-    @transaction.commit_on_success
+    @transaction.atomic
     def change_view(self, request, object_id, form_url='', extra_context=None):
         "The 'change' admin view for this model."
         model = self.model
@@ -250,7 +250,7 @@ class NestedModelAdmin(admin.ModelAdmin):
             raise PermissionDenied
 
         if obj is None:
-            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_unicode(opts.verbose_name), 'key': escape(object_id)})
+            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_text(opts.verbose_name), 'key': escape(object_id)})
 
         if request.method == 'POST' and "_saveasnew" in request.POST:
             return self.add_view(request, form_url=reverse('admin:%s_%s_add' %
@@ -321,7 +321,7 @@ class NestedModelAdmin(admin.ModelAdmin):
                 media += self.wrap_nested_inline_formsets(request, inline, formset)
 
         context = {
-            'title': _('Change %s') % force_unicode(opts.verbose_name),
+            'title': _('Change %s') % force_text(opts.verbose_name),
             'adminform': adminForm,
             'object_id': object_id,
             'original': obj,
