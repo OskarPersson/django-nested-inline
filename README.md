@@ -79,6 +79,8 @@ admin.py
 Changelist
 ----------
 
+0.3.5 - Removed deprecated methods and updated for Django 1.8/1.9
+
 0.3.4 - added licence and updated for python 3
 
 0.3.3 - fixed bug where inlines without inlines would cause an error
