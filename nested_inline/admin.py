@@ -24,7 +24,7 @@ class NestedModelAdmin(admin.ModelAdmin):
         css = {
             "all": ('admin/css/forms-nested.css',)
         }
-        js = ('admin/js/inlines-nested.js',)
+        js = ('admin/js/inlines-nested%s.js' % ('' if settings.DEBUG else '.min'),)
 
     def get_inline_instances(self, request, obj=None):
         inline_instances = []
