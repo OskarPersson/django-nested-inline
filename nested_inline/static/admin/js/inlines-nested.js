@@ -100,6 +100,7 @@
                     // If a post-delete callback was provided, call it with the deleted form:
                     if (options.removed) {
                         options.removed(formset_to_update);
+                        $(document).trigger('formset:removed', [row, options.prefix]);
                     }
                 });
                 if (row.is("tr")) {
@@ -131,6 +132,7 @@
                 // If a post-add callback was supplied, call it with the added form:
                 if (options.added) {
                     options.added(row);
+                    $(document).trigger('formset:added', [row, options.prefix]);
                 }
                 nextIndex = nextIndex + 1;
             });
