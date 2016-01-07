@@ -23,6 +23,7 @@ Usage
 Add `nested_inline` to `INSTALLED_APPS`
 
 models.py
+
     from django.db import models
 
     class TopLevel(models.Model):
