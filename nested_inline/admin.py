@@ -1,3 +1,4 @@
+from django import VERSION
 from django.contrib import admin
 from django.contrib.admin import helpers
 from django.contrib.admin.options import reverse, InlineModelAdmin
@@ -180,7 +181,17 @@ class NestedModelAdmin(admin.ModelAdmin):
             if self.all_valid_with_nesting(formsets) and form_validated:
                 self.save_model(request, new_object, form, False)
                 self.save_related(request, form, formsets, False)
-                self.log_addition(request, new_object)
+                args = ()
+                # Provide `add_message` argument to ModelAdmin.log_addition for
+                # Django 1.9 and up.
+                if VERSION[:2] >= (1, 9):
+                    add_message = self.construct_change_message(
+                        request, form, formsets, add=True
+                    )
+                    args = (request, new_object, add_message)
+                else:
+                    args = (request, new_object)
+                self.log_addition(*args)
                 return self.response_add(request, new_object)
         else:
             # Prepare the dict of initial data from the request.
