@@ -101,9 +101,9 @@ class NestedModelAdmin(admin.ModelAdmin):
                     instance = form.instance
                 else:
                     instance = None
-                fieldsets = list(nested_inline.get_fieldsets(request))
-                readonly = list(nested_inline.get_readonly_fields(request))
-                prepopulated = dict(nested_inline.get_prepopulated_fields(request))
+                fieldsets = list(nested_inline.get_fieldsets(request, instance))
+                readonly = list(nested_inline.get_readonly_fields(request, instance))
+                prepopulated = dict(nested_inline.get_prepopulated_fields(request, instance))
                 wrapped_nested_formset = helpers.InlineAdminFormSet(nested_inline, nested_formset,
                     fieldsets, prepopulated, readonly, model_admin=self)
                 wrapped_nested_formsets.append(wrapped_nested_formset)
