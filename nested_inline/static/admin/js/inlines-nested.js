@@ -58,6 +58,7 @@
                 var nextIndex = get_no_forms(options.prefix);
                 var template = $("#" + options.prefix + "-empty");
                 var row = template.clone(true);
+                row.find('input:hidden').removeAttr('value');
                 row.removeClass(options.emptyCssClass).addClass(options.formCssClass).attr("id", options.prefix + "-" + nextIndex);
                 if (row.is("tr")) {
                     // If the forms are laid out in table rows, insert
