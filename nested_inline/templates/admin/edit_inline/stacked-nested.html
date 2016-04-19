@@ -11,9 +11,11 @@
         {% if recursive_formset.formset.can_delete and inline_admin_form.original %}<span class="delete">{{ inline_admin_form.deletion_field.field }} {{ inline_admin_form.deletion_field.label_tag }}</span>{% endif %}
   </h3>
   {% if inline_admin_form.form.non_field_errors %}{{ inline_admin_form.form.non_field_errors }}{% endif %}
-  {% for fieldset in inline_admin_form %}
-    {% include "admin/includes/fieldset.html" %}
-  {% endfor %}
+  {% with stacked_prefix=inline_admin_formset.formset.prefix %}
+    {% for fieldset in inline_admin_form %}
+      {% include "admin/includes/fieldset.html" %}
+    {% endfor %}
+  {% endwith %}
   {% if inline_admin_form.pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
   {{ inline_admin_form.fk_field.field }}
   {% if inline_admin_form.form.nested_formsets %}
