@@ -28,7 +28,8 @@ class NestedModelAdmin(admin.ModelAdmin):
         js = ('admin/js/inlines-nested.js',)
 
     def get_inline_instances(self, request, obj=None):
-        inline_instances = []
+        inline_instances = super(
+            NestedModelAdmin, self).get_inline_instances(request, obj)
         for inline_class in self.inlines:
             inline = inline_class(self.model, self.admin_site)
             if request:
