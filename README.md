@@ -80,6 +80,8 @@ admin.py
 Changelist
 ----------
 
+0.3.7 - added support for django 1.10, fix unique fieldset id
+
 0.3.6 - added support for django 1.9
 
 0.3.5 - Removed deprecated methods and updated for Django 1.8/1.9
