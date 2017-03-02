@@ -25,7 +25,7 @@ class NestedModelAdmin(admin.ModelAdmin):
         css = {
             "all": ('admin/css/forms-nested.css',)
         }
-        js = ('admin/js/inlines-nested.js',)
+        js = ('admin/js/inlines-nested%s.js' % ('' if settings.DEBUG else '.min'),)
 
     def get_inline_instances(self, request, obj=None):
         inline_instances = []
@@ -245,6 +245,7 @@ class NestedModelAdmin(admin.ModelAdmin):
             'errors': helpers.AdminErrorList(form, formsets),
             'app_label': opts.app_label,
             }
+        context.update(self.admin_site.each_context(request))
         context.update(extra_context or {})
         return self.render_change_form(request, context, form_url=form_url, add=True)
 
@@ -342,6 +343,7 @@ class NestedModelAdmin(admin.ModelAdmin):
             'errors': helpers.AdminErrorList(form, formsets),
             'app_label': opts.app_label,
             }
+        context.update(self.admin_site.each_context(request))
         context.update(extra_context or {})
         return self.render_change_form(request, context, change=True, obj=obj, form_url=form_url)
 

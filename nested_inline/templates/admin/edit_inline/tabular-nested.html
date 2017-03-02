@@ -85,7 +85,7 @@
 <script type="text/javascript">
 (function($) {
     $(document).ready(function($) {
-        var rows = "#{{ recursive_formset.formset.prefix }}-group .tabular.inline-related tbody tr";
+        var rows = "#{{ recursive_formset.formset.prefix }}-group .tabular.inline-related:first tbody:first > tr";
         var alternatingRows = function(row) {
             $(rows).not(".add-row").removeClass("row1 row2")
                 .filter(":even").addClass("row1").end()
