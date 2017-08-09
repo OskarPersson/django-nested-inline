@@ -97,6 +97,13 @@
                     }
                     row.remove();
                     change_no_forms(options.prefix, false);
+                    // check if add row is to be shown
+                    if ((get_max_forms(options.prefix) !== '') && (get_max_forms(options.prefix) - get_no_forms(options.prefix)) > 0) {
+                        var add_row = formset_to_update.find('div.add-row:contains(\''+ options.addText + '\')')
+                        if (add_row && !add_row.is(':visible')) {
+                            add_row.show()
+                        }
+                    }
                     // If a post-delete callback was provided, call it with the deleted form:
                     if (options.removed) {
                         options.removed(formset_to_update);
