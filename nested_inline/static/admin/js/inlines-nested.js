@@ -312,17 +312,24 @@
                 template.find(".nested-inline-row").remove();
                 // Make a new form
                 template_form = template.find("#" + normalized_formset_prefix + "-empty")
+                var inputs = template_form.find('input');
+                inputs.each(function () {
+                    var $input = $(this)
+                    if ($input.attr('type') == 'hidden' && $input.val()) {
+                        $input.removeAttr('value')
+                    }
+                });
                 new_form = template_form.clone().removeClass(options.emptyCssClass).addClass("dynamic-" + formset_prefix);
 
                 new_form.insertBefore(template_form);
 
-                var inputs = new_form.find('input');
-                inputs.each(function () {
-                    var $input = $(this)
-                    if ($input.val()) {
-                        $input.removeAttr('value')
-                    }
-                });
+                // var inputs = new_form.find('input');
+                // inputs.each(function () {
+                //     var $input = $(this)
+                //     if ($input.val()) {
+                //         $input.removeAttr('value')
+                //     }
+                // });
 
                 // Update Form Properties
                 update_props(template, normalized_formset_prefix, formset_prefix);
@@ -359,17 +366,24 @@
                 template.find(".inline-related").not(".empty-form").remove();
                 // Make a new form
                 template_form = template.find("#" + normalized_formset_prefix + "-empty")
+                var inputs = template_form.find('input');
+                inputs.each(function () {
+                    var $input = $(this)
+                    if ($input.attr('type') == 'hidden' && $input.val()) {
+                        $input.removeAttr('value')
+                    }
+                });
                 new_form = template_form.clone().removeClass(options.emptyCssClass).addClass("dynamic-" + formset_prefix);
 
                 new_form.insertBefore(template_form);
 
-                var inputs = new_form.find('input');
-                inputs.each(function () {
-                    var $input = $(this)
-                    if ($input.val()) {
-                        $input.removeAttr('value')
-                    }
-                });
+                // var inputs = new_form.find('input');
+                // inputs.each(function () {
+                //     var $input = $(this)
+                //     if ($input.val()) {
+                //         $input.removeAttr('value')
+                //     }
+                // });
 
                 // Update Form Properties
                 new_form.find('.inline_label').text('#1');
