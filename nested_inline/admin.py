@@ -321,6 +321,7 @@ class NestedModelAdmin(admin.ModelAdmin):
 
         inline_admin_formsets = []
         for inline, formset in zip(inline_instances, formsets):
+            inline.root_obj = obj
             fieldsets = list(inline.get_fieldsets(request, obj))
             readonly = list(inline.get_readonly_fields(request, obj))
             prepopulated = dict(inline.get_prepopulated_fields(request, obj))
@@ -348,6 +349,7 @@ class NestedModelAdmin(admin.ModelAdmin):
 
 
 class NestedInline(InlineModelAdmin):
+    root_obj = None
     inlines = []
     new_objects = []
 
@@ -365,6 +367,7 @@ class NestedInline(InlineModelAdmin):
         inline_instances = []
         for inline_class in self.inlines:
             inline = inline_class(self.model, self.admin_site)
+            inline.root_obj = self.root_obj
             if request:
                 if not (inline.has_add_permission(request) or
                         inline.has_change_permission(request, obj) or
