@@ -182,7 +182,7 @@ body.popup .submit-row {
 }
 
 .submit-row .deletelink {
-    background: url(../img/icon_deletelink.gif) 0 50% no-repeat;
+    background: url(../img/icon_deletelink.svg) 0 50% no-repeat;
     padding-left: 14px;
 }
 
@@ -345,7 +345,7 @@ body.popup .submit-row {
 .inline-group ul.tools a.add,
 .inline-group div.add-row a,
 .inline-group .tabular tr.add-row td a {
-    background: url(../img/icon_addlink.gif) 0 50% no-repeat;
+    background: url(../img/icon_addlink.svg) 0 50% no-repeat;
     padding-left: 14px;
     font-size: 11px;
     outline: 0; /* Remove dotted border around link */
