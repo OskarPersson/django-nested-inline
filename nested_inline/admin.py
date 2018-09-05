@@ -233,7 +233,9 @@ class NestedModelAdmin(admin.ModelAdmin):
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
             if hasattr(inline, 'inlines') and inline.inlines:
-                media += self.wrap_nested_inline_formsets(request, inline, formset)
+                extra_media = self.wrap_nested_inline_formsets(request, inline, formset)
+                if extra_media:
+                    media += extra_media
 
         context = {
             'title': _('Add %s') % force_text(opts.verbose_name),
@@ -330,7 +332,9 @@ class NestedModelAdmin(admin.ModelAdmin):
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
             if hasattr(inline, 'inlines') and inline.inlines:
-                media += self.wrap_nested_inline_formsets(request, inline, formset)
+                extra_media = self.wrap_nested_inline_formsets(request, inline, formset)
+                if extra_media:
+                    media += extra_media
 
         context = {
             'title': _('Change %s') % force_text(opts.verbose_name),
