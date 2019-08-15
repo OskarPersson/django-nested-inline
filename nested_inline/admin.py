@@ -332,7 +332,9 @@ class NestedModelAdmin(admin.ModelAdmin):
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
             if hasattr(inline, 'inlines') and inline.inlines:
-                media += self.wrap_nested_inline_formsets(request, inline, formset)
+                wrapped = self.wrap_nested_inline_formsets(request, inline, formset)
+                if wrapped:
+                    media += wrapped
 
         context = {
             'title': _('Change %s') % force_text(opts.verbose_name),
