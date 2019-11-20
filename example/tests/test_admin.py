@@ -5,6 +5,6 @@ from example.app.admin import TopLevelAdmin
 from example.app.models import TopLevel
 
 
-class TestSubquery(SimpleTestCase):
-    def test_with_count(self):
+class TopLevelAdminTestCasey(SimpleTestCase):
+    def test_top_level(self):
         TopLevelAdmin(TopLevel, AdminSite())
