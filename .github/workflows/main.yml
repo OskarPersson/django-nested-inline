@@ -57,6 +57,9 @@ jobs:
           - "py37-django22"
 
         include:
+          - python: "2.7"
+            tox_env: "py27-django11"
+
           - python: "3.5"
             tox_env: "py35-django11"
           - python: "3.5"
