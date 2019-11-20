@@ -50,11 +50,15 @@ jobs:
           - "py36-django20"
           - "py36-django21"
           - "py36-django22"
+          - "py36-django30"
 
           - "py37-django11"
           - "py37-django20"
           - "py37-django21"
           - "py37-django22"
+          - "py37-django30"
+
+          - "py38-django30"
 
         include:
           - python: "2.7"
@@ -77,6 +81,8 @@ jobs:
             tox_env: "py36-django21"
           - python: "3.6"
             tox_env: "py36-django22"
+          - python: "3.6"
+            tox_env: "py36-django30"
 
           - python: "3.7"
             tox_env: "py37-django11"
@@ -86,6 +92,11 @@ jobs:
             tox_env: "py37-django21"
           - python: "3.7"
             tox_env: "py37-django22"
+          - python: "3.7"
+            tox_env: "py37-django30"
+
+          - python: "3.8"
+            tox_env: "py38-django30"
 
 
     steps:
