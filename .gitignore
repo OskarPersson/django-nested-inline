@@ -1,6 +1,7 @@
 *.log
 *.pot
 *.pyc
+*.sqlite3
 .tox
 local_settings.py
 dist

@@ -39,20 +39,26 @@ jobs:
       fail-fast: false
       matrix:
         tox_env:
-          - "py27-django11"
+          - "py27-django18"
+          - "py27-django19"
+          - "py27-django110"
+          - "py27-django111"
 
-          - "py35-django11"
+          - "py35-django18"
+          - "py35-django19"
+          - "py35-django110"
+          - "py35-django111"
           - "py35-django20"
           - "py35-django21"
           - "py35-django22"
 
-          - "py36-django11"
+          - "py36-django111"
           - "py36-django20"
           - "py36-django21"
           - "py36-django22"
           - "py36-django30"
 
-          - "py37-django11"
+          - "py37-django111"
           - "py37-django20"
           - "py37-django21"
           - "py37-django22"
@@ -62,10 +68,22 @@ jobs:
 
         include:
           - python: "2.7"
-            tox_env: "py27-django11"
+            tox_env: "py27-django18"
+          - python: "2.7"
+            tox_env: "py27-django19"
+          - python: "2.7"
+            tox_env: "py27-django110"
+          - python: "2.7"
+            tox_env: "py27-django111"
 
           - python: "3.5"
-            tox_env: "py35-django11"
+            tox_env: "py35-django18"
+          - python: "3.5"
+            tox_env: "py35-django19"
+          - python: "3.5"
+            tox_env: "py35-django110"
+          - python: "3.5"
+            tox_env: "py35-django111"
           - python: "3.5"
             tox_env: "py35-django20"
           - python: "3.5"
@@ -74,7 +92,7 @@ jobs:
             tox_env: "py35-django22"
 
           - python: "3.6"
-            tox_env: "py36-django11"
+            tox_env: "py36-django111"
           - python: "3.6"
             tox_env: "py36-django20"
           - python: "3.6"
@@ -85,7 +103,7 @@ jobs:
             tox_env: "py36-django30"
 
           - python: "3.7"
-            tox_env: "py37-django11"
+            tox_env: "py37-django111"
           - python: "3.7"
             tox_env: "py37-django20"
           - python: "3.7"
