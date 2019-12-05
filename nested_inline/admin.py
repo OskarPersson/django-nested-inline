@@ -1,25 +1,44 @@
-from django import VERSION
+from django import VERSION, forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import helpers
-from django.contrib.admin.options import reverse, InlineModelAdmin
+from django.contrib.admin.options import InlineModelAdmin, reverse
+from django.contrib.admin.utils import unquote
 from django.core.exceptions import PermissionDenied
+from django.db import models, transaction
 from django.forms.formsets import all_valid
 from django.http import Http404
+from django.templatetags.static import static
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
-from django.views.decorators.csrf import csrf_protect
-from django.utils.translation import ugettext as _
-from django.contrib.admin.utils import unquote
-from django.db import transaction, models
 from django.utils.html import escape
-from django.conf import settings
-from django import forms
-from django.contrib.admin.templatetags.admin_static import static
+from django.utils.translation import ugettext as _
+from django.views.decorators.csrf import csrf_protect
 
 csrf_protect_m = method_decorator(csrf_protect)
 
 
-class NestedModelAdmin(admin.ModelAdmin):
+class InlineInstancesMixin():
+    def get_inline_instances(self, request, obj=None):
+        inline_instances = []
+        for inline_class in self.inlines:
+            inline = inline_class(self.model, self.admin_site)
+            if request:
+                if VERSION < (2, 1, 0):
+                    if not inline.has_add_permission(request):
+                        continue
+                else:
+                    if not inline.has_add_permission(request, obj):
+                        continue
+
+                if not (inline.has_change_permission(request, obj) or
+                        inline.has_delete_permission(request, obj)):
+                    continue
+            inline_instances.append(inline)
+        return inline_instances
+
+
+class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
 
     class Media:
         css = {
@@ -27,26 +46,11 @@ class NestedModelAdmin(admin.ModelAdmin):
         }
         js = ('admin/js/inlines-nested%s.js' % ('' if settings.DEBUG else '.min'),)
 
-    def get_inline_instances(self, request, obj=None):
-        inline_instances = []
-        for inline_class in self.inlines:
-            inline = inline_class(self.model, self.admin_site)
-            if request:
-                if not (inline.has_add_permission(request) or
-                        inline.has_change_permission(request, obj) or
-                        inline.has_delete_permission(request, obj)):
-                    continue
-                if not inline.has_add_permission(request):
-                    inline.max_num = 0
-            inline_instances.append(inline)
-
-        return inline_instances
-
     def save_formset(self, request, form, formset, change):
         """
         Given an inline formset save it to the database.
         """
-        instances = formset.save()
+        formset.save()
 
         for form in formset.forms:
             if hasattr(form, 'nested_formsets') and form not in formset.deleted_forms:
@@ -76,18 +80,19 @@ class NestedModelAdmin(admin.ModelAdmin):
 
                 if request.method == 'POST' and any(s.startswith(prefix) for s in request.POST.keys()):
                     nested_formset = InlineFormSet(request.POST, request.FILES,
-                        instance=form.instance,
-                        prefix=prefix, queryset=nested_inline.get_queryset(request))
+                                                   instance=form.instance,
+                                                   prefix=prefix, queryset=nested_inline.get_queryset(request))
                 else:
                     nested_formset = InlineFormSet(instance=form.instance,
-                        prefix=prefix, queryset=nested_inline.get_queryset(request))
+                                                   prefix=prefix, queryset=nested_inline.get_queryset(request))
                 nested_formsets.append(nested_formset)
                 if nested_inline.inlines:
-                    self.add_nested_inline_formsets(request, nested_inline, nested_formset, depth=depth+1)
+                    self.add_nested_inline_formsets(request, nested_inline, nested_formset, depth=depth + 1)
             form.nested_formsets = nested_formsets
 
     def wrap_nested_inline_formsets(self, request, inline, formset):
         media = None
+
         def get_media(extra_media):
             if media:
                 return media + extra_media
@@ -104,8 +109,10 @@ class NestedModelAdmin(admin.ModelAdmin):
                 fieldsets = list(nested_inline.get_fieldsets(request, instance))
                 readonly = list(nested_inline.get_readonly_fields(request, instance))
                 prepopulated = dict(nested_inline.get_prepopulated_fields(request, instance))
-                wrapped_nested_formset = helpers.InlineAdminFormSet(nested_inline, nested_formset,
-                    fieldsets, prepopulated, readonly, model_admin=self)
+                wrapped_nested_formset = helpers.InlineAdminFormSet(
+                    nested_inline, nested_formset,
+                    fieldsets, prepopulated, readonly, model_admin=self,
+                )
                 wrapped_nested_formsets.append(wrapped_nested_formset)
                 media = get_media(wrapped_nested_formset.media)
                 if nested_inline.inlines:
@@ -124,7 +131,6 @@ class NestedModelAdmin(admin.ModelAdmin):
                     if self.formset_has_nested_data(form.nested_formsets):
                         return True
 
-
     def all_valid_with_nesting(self, formsets):
         "Recursively validate all nested formsets"
         if not all_valid(formsets):
@@ -138,9 +144,13 @@ class NestedModelAdmin(admin.ModelAdmin):
                     if not self.all_valid_with_nesting(form.nested_formsets):
                         return False
 
-                    #TODO - find out why this breaks when extra = 1 and just adding new item with no sub items
-                    if (not hasattr(form, 'cleaned_data') or not form.cleaned_data) and self.formset_has_nested_data(form.nested_formsets):
-                        form._errors["__all__"] = form.error_class([u"Parent object must be created when creating nested inlines."])
+                    # TODO - find out why this breaks when extra = 1 and just adding new item with no sub items
+                    if (not hasattr(form, 'cleaned_data') or not form.cleaned_data) and\
+                            self.formset_has_nested_data(form.nested_formsets):
+
+                        form._errors["__all__"] = form.error_class(
+                            [u"Parent object must be created when creating nested inlines."]
+                        )
                         return False
         return True
 
@@ -172,9 +182,9 @@ class NestedModelAdmin(admin.ModelAdmin):
                 if prefixes[prefix] != 1 or not prefix:
                     prefix = "%s-%s" % (prefix, prefixes[prefix])
                 formset = FormSet(data=request.POST, files=request.FILES,
-                    instance=new_object,
-                    save_as_new="_saveasnew" in request.POST,
-                    prefix=prefix, queryset=inline.get_queryset(request))
+                                  instance=new_object,
+                                  save_as_new="_saveasnew" in request.POST,
+                                  prefix=prefix, queryset=inline.get_queryset(request))
                 formsets.append(formset)
                 if inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
@@ -212,15 +222,15 @@ class NestedModelAdmin(admin.ModelAdmin):
                 if prefixes[prefix] != 1 or not prefix:
                     prefix = "%s-%s" % (prefix, prefixes[prefix])
                 formset = FormSet(instance=self.model(), prefix=prefix,
-                    queryset=inline.get_queryset(request))
+                                  queryset=inline.get_queryset(request))
                 formsets.append(formset)
                 if hasattr(inline, 'inlines') and inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
 
         adminForm = helpers.AdminForm(form, list(self.get_fieldsets(request)),
-            self.get_prepopulated_fields(request),
-            self.get_readonly_fields(request),
-            model_admin=self)
+                                      self.get_prepopulated_fields(request),
+                                      self.get_readonly_fields(request),
+                                      model_admin=self)
         media = self.media + adminForm.media
 
         inline_admin_formsets = []
@@ -229,11 +239,13 @@ class NestedModelAdmin(admin.ModelAdmin):
             readonly = list(inline.get_readonly_fields(request))
             prepopulated = dict(inline.get_prepopulated_fields(request))
             inline_admin_formset = helpers.InlineAdminFormSet(inline, formset,
-                fieldsets, prepopulated, readonly, model_admin=self)
+                                                              fieldsets, prepopulated, readonly, model_admin=self)
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
             if hasattr(inline, 'inlines') and inline.inlines:
-                extra_media = self.wrap_nested_inline_formsets(request, inline, formset)
+                extra_media = self.wrap_nested_inline_formsets(
+                    request, inline, formset)
+
                 if extra_media:
                     media += extra_media
 
@@ -246,7 +258,7 @@ class NestedModelAdmin(admin.ModelAdmin):
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
             'app_label': opts.app_label,
-            }
+        }
         context.update(self.admin_site.each_context(request))
         context.update(extra_context or {})
         return self.render_change_form(request, context, form_url=form_url, add=True)
@@ -264,12 +276,14 @@ class NestedModelAdmin(admin.ModelAdmin):
             raise PermissionDenied
 
         if obj is None:
-            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_text(opts.verbose_name), 'key': escape(object_id)})
+            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {
+                          'name': force_text(opts.verbose_name), 'key': escape(object_id)})
 
         if request.method == 'POST' and "_saveasnew" in request.POST:
             return self.add_view(request, form_url=reverse('admin:%s_%s_add' %
-                                                           (opts.app_label, opts.module_name),
-                current_app=self.admin_site.name))
+                                                           (opts.app_label,
+                                                            opts.module_name),
+                                                           current_app=self.admin_site.name))
 
         ModelForm = self.get_form(request, obj)
         formsets = []
@@ -288,9 +302,10 @@ class NestedModelAdmin(admin.ModelAdmin):
                 prefixes[prefix] = prefixes.get(prefix, 0) + 1
                 if prefixes[prefix] != 1 or not prefix:
                     prefix = "%s-%s" % (prefix, prefixes[prefix])
-                formset = FormSet(request.POST, request.FILES,
-                    instance=new_object, prefix=prefix,
-                    queryset=inline.get_queryset(request))
+                formset = FormSet(
+                    request.POST, request.FILES, instance=new_object,
+                    prefix=prefix, queryset=inline.get_queryset(request),
+                )
                 formsets.append(formset)
                 if hasattr(inline, 'inlines') and inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
@@ -310,16 +325,17 @@ class NestedModelAdmin(admin.ModelAdmin):
                 prefixes[prefix] = prefixes.get(prefix, 0) + 1
                 if prefixes[prefix] != 1 or not prefix:
                     prefix = "%s-%s" % (prefix, prefixes[prefix])
-                formset = FormSet(instance=obj, prefix=prefix,
-                    queryset=inline.get_queryset(request))
+                formset = FormSet(instance=obj, prefix=prefix, queryset=inline.get_queryset(request))
                 formsets.append(formset)
                 if hasattr(inline, 'inlines') and inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
 
-        adminForm = helpers.AdminForm(form, self.get_fieldsets(request, obj),
+        adminForm = helpers.AdminForm(
+            form, self.get_fieldsets(request, obj),
             self.get_prepopulated_fields(request, obj),
             self.get_readonly_fields(request, obj),
-            model_admin=self)
+            model_admin=self,
+        )
         media = self.media + adminForm.media
 
         inline_admin_formsets = []
@@ -327,8 +343,9 @@ class NestedModelAdmin(admin.ModelAdmin):
             fieldsets = list(inline.get_fieldsets(request, obj))
             readonly = list(inline.get_readonly_fields(request, obj))
             prepopulated = dict(inline.get_prepopulated_fields(request, obj))
-            inline_admin_formset = helpers.InlineAdminFormSet(inline, formset,
-                fieldsets, prepopulated, readonly, model_admin=self)
+            inline_admin_formset = helpers.InlineAdminFormSet(
+                inline, formset, fieldsets, prepopulated, readonly, model_admin=self,
+            )
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
             if hasattr(inline, 'inlines') and inline.inlines:
@@ -346,14 +363,13 @@ class NestedModelAdmin(admin.ModelAdmin):
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
             'app_label': opts.app_label,
-            }
+        }
         context.update(self.admin_site.each_context(request))
         context.update(extra_context or {})
         return self.render_change_form(request, context, change=True, obj=obj, form_url=form_url)
 
 
-
-class NestedInline(InlineModelAdmin):
+class NestedInline(InlineInstancesMixin, InlineModelAdmin):
     inlines = []
     new_objects = []
 
@@ -366,20 +382,6 @@ class NestedInline(InlineModelAdmin):
         if self.filter_vertical or self.filter_horizontal:
             js.extend(['SelectBox.js', 'SelectFilter2.js'])
         return forms.Media(js=[static('admin/js/%s' % url) for url in js])
-
-    def get_inline_instances(self, request, obj=None):
-        inline_instances = []
-        for inline_class in self.inlines:
-            inline = inline_class(self.model, self.admin_site)
-            if request:
-                if not (inline.has_add_permission(request) or
-                        inline.has_change_permission(request, obj) or
-                        inline.has_delete_permission(request, obj)):
-                    continue
-                if not inline.has_add_permission(request):
-                    inline.max_num = 0
-            inline_instances.append(inline)
-        return inline_instances
 
     def get_formsets_with_inlines(self, request, obj=None):
         for inline in self.get_inline_instances(request):
