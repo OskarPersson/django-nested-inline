@@ -25,16 +25,21 @@ class InlineInstancesMixin():
             inline = inline_class(self.model, self.admin_site)
             if request:
                 if VERSION < (2, 1, 0):
+                    if not (inline.has_add_permission(request) or
+                            inline.has_change_permission(request, obj) or
+                            inline.has_delete_permission(request, obj)):
+                        continue
                     if not inline.has_add_permission(request):
-                        continue
+                        inline.max_num = 0
                 else:
-                    if not inline.has_add_permission(request, obj):
+                    if not (inline.has_add_permission(request, obj) or
+                            inline.has_change_permission(request, obj) or
+                            inline.has_delete_permission(request, obj)):
                         continue
-
-                if not (inline.has_change_permission(request, obj) or
-                        inline.has_delete_permission(request, obj)):
-                    continue
+                    if not inline.has_add_permission(request, obj):
+                        inline.max_num = 0
             inline_instances.append(inline)
+
         return inline_instances
 
 
