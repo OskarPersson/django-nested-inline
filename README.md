@@ -80,6 +80,8 @@ admin.py
 Changelist
 ----------
 
+0.4.2 - Fix assets
+
 0.4.1 - Fix permission checks
 
 0.4.0 - Added support for Django 3.0
