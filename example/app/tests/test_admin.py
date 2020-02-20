@@ -13,8 +13,6 @@ except ImportError:
     from django.core.urlresolvers import reverse
 
 
-
-
 class TopLevelAdminTestCase(TestCase):
     def setUp(self):
         self.superuser = User.objects.create_superuser(username='super', password='secret', email='super@example.com')
