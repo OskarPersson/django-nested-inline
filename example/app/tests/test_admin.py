@@ -5,13 +5,14 @@ from django.contrib.auth.models import Permission, User
 from django.template.response import TemplateResponse
 from django.test import TestCase
 
+from example.app.models import TopLevel
+
 try:
     from django.urls import reverse
 except ImportError:
     from django.core.urlresolvers import reverse
 
 
-from example.app.models import TopLevel
 
 
 class TopLevelAdminTestCase(TestCase):

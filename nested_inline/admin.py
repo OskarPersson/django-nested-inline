@@ -5,7 +5,6 @@ from django.contrib.admin import helpers
 from django.contrib.admin.options import InlineModelAdmin, reverse
 from django.contrib.admin.utils import flatten_fieldsets, unquote
 from django.contrib.auth import get_permission_codename
-
 from django.core.exceptions import PermissionDenied
 from django.db import models, transaction
 from django.forms.formsets import all_valid
