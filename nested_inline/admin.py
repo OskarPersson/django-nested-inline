@@ -286,8 +286,11 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
 
         obj = self.get_object(request, unquote(object_id))
 
+        has_change_permission = self.has_change_permission(request, obj)
+        has_add_permission = self.has_add_permission(request)
+
         if request.method == 'POST':
-            if not self.has_change_permission(request, obj):
+            if not has_change_permission:
                 raise PermissionDenied
         else:
             if not self.has_view_or_change_permission(request, obj):
@@ -348,14 +351,14 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
                 if hasattr(inline, 'inlines') and inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
 
-        if not self.has_change_permission(request, obj):
+        if not has_change_permission:
             readonly_fields = flatten_fieldsets(self.get_fieldsets(request, obj))
         else:
             readonly_fields = self.get_readonly_fields(request, obj)
 
         adminForm = helpers.AdminForm(
             form, self.get_fieldsets(request, obj),
-            self.get_prepopulated_fields(request, obj) if self.has_change_permission(request, obj) else {},
+            self.get_prepopulated_fields(request, obj) if has_change_permission else {},
             readonly_fields,
             model_admin=self,
         )
@@ -365,15 +368,19 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
         for inline, formset in zip(inline_instances, formsets):
             fieldsets = list(inline.get_fieldsets(request, obj))
             readonly = list(inline.get_readonly_fields(request, obj))
-            prepopulated = dict(inline.get_prepopulated_fields(request, obj))
+            prepopulated = dict(inline.get_prepopulated_fields(request, obj)) if has_change_permission else {}
+
             inline_admin_formset = helpers.InlineAdminFormSet(
-                inline, formset, fieldsets, prepopulated, readonly, model_admin=self,
+                inline, formset, fieldsets, prepopulated, readonly,
+                model_admin=self,
+                has_change_permission=has_change_permission,
+                has_add_permission=False,
             )
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
             if hasattr(inline, 'inlines') and inline.inlines:
                 extra_media = self.wrap_nested_inline_formsets(
-                    request, inline, formset, self.has_change_permission(request, obj),
+                    request, inline, formset, not has_change_permission,
                 )
                 if extra_media:
                     media += extra_media
