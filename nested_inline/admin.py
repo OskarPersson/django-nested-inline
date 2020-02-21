@@ -374,7 +374,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
                 inline, formset, fieldsets, prepopulated, readonly,
                 model_admin=self,
                 has_change_permission=has_change_permission,
-                has_add_permission=False,
+                has_add_permission=False if not has_change_permission else self.has_add_permission(request),
             )
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
