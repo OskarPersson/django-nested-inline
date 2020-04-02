@@ -106,7 +106,7 @@ form .aligned p.help {
     padding-left: 0 !important;
 }
 
-fieldset .field-box {
+fieldset .fieldBox {
     float: left;
     margin-right: 20px;
 }
