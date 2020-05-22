@@ -3,7 +3,8 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import helpers
 from django.contrib.admin.options import InlineModelAdmin, reverse
-from django.contrib.admin.utils import unquote
+from django.contrib.admin.utils import flatten_fieldsets, unquote
+from django.contrib.auth import get_permission_codename
 from django.core.exceptions import PermissionDenied
 from django.db import models, transaction
 from django.forms.formsets import all_valid
@@ -95,7 +96,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
                     self.add_nested_inline_formsets(request, nested_inline, nested_formset, depth=depth + 1)
             form.nested_formsets = nested_formsets
 
-    def wrap_nested_inline_formsets(self, request, inline, formset):
+    def wrap_nested_inline_formsets(self, request, inline, formset, read_only):
         media = None
 
         def get_media(extra_media):
@@ -112,16 +113,29 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
                 else:
                     instance = None
                 fieldsets = list(nested_inline.get_fieldsets(request, instance))
-                readonly = list(nested_inline.get_readonly_fields(request, instance))
-                prepopulated = dict(nested_inline.get_prepopulated_fields(request, instance))
+
+                if read_only:
+                    readonly = flatten_fieldsets(list(nested_inline.get_fieldsets(request, instance)))
+                    prepopulated = {}
+                    nested_formset.extra = nested_formset.max_num = 0
+                else:
+                    readonly = list(nested_inline.get_readonly_fields(request, instance))
+                    prepopulated = dict(nested_inline.get_prepopulated_fields(request, instance))
+
                 wrapped_nested_formset = helpers.InlineAdminFormSet(
                     nested_inline, nested_formset,
                     fieldsets, prepopulated, readonly, model_admin=self,
+                    has_add_permission=not read_only,
+                    has_change_permission=not read_only,
+                    has_delete_permission=not read_only,
+                    has_view_permission=True,
                 )
                 wrapped_nested_formsets.append(wrapped_nested_formset)
                 media = get_media(wrapped_nested_formset.media)
                 if nested_inline.inlines:
-                    media = get_media(self.wrap_nested_inline_formsets(request, nested_inline, nested_formset))
+                    media = get_media(
+                        self.wrap_nested_inline_formsets(request, nested_inline, nested_formset, read_only)
+                    )
             form.nested_formsets = wrapped_nested_formsets
         return media
 
@@ -249,7 +263,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
             media = media + inline_admin_formset.media
             if hasattr(inline, 'inlines') and inline.inlines:
                 extra_media = self.wrap_nested_inline_formsets(
-                    request, inline, formset)
+                    request, inline, formset, False)
 
                 if extra_media:
                     media += extra_media
@@ -277,8 +291,15 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
 
         obj = self.get_object(request, unquote(object_id))
 
-        if not self.has_change_permission(request, obj):
-            raise PermissionDenied
+        has_change_permission = self.has_change_permission(request, obj)
+        has_add_permission = self.has_add_permission(request)
+
+        if request.method == 'POST':
+            if not has_change_permission:
+                raise PermissionDenied
+        else:
+            if not self.has_view_or_change_permission(request, obj):
+                raise PermissionDenied
 
         if obj is None:
             raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {
@@ -335,31 +356,60 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
                 if hasattr(inline, 'inlines') and inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
 
+        if not has_change_permission:
+            readonly_fields = flatten_fieldsets(self.get_fieldsets(request, obj))
+        else:
+            readonly_fields = self.get_readonly_fields(request, obj)
+
         adminForm = helpers.AdminForm(
             form, self.get_fieldsets(request, obj),
-            self.get_prepopulated_fields(request, obj),
-            self.get_readonly_fields(request, obj),
+            self.get_prepopulated_fields(request, obj) if has_change_permission else {},
+            readonly_fields,
             model_admin=self,
         )
         media = self.media + adminForm.media
 
+        can_edit_parent = self.has_change_permission(request, obj)
         inline_admin_formsets = []
         for inline, formset in zip(inline_instances, formsets):
             fieldsets = list(inline.get_fieldsets(request, obj))
             readonly = list(inline.get_readonly_fields(request, obj))
-            prepopulated = dict(inline.get_prepopulated_fields(request, obj))
+            prepopulated = dict(inline.get_prepopulated_fields(request, obj)) if has_change_permission else {}
+
+            if can_edit_parent:
+                inline_has_add_permission = inline.has_add_permission(request, obj)
+                inline_has_change_permission = inline.has_change_permission(request, obj)
+                inline_has_delete_permission = inline.has_delete_permission(request, obj)
+            else:
+                # Disable all edit-permissions, and overide formset settings.
+                inline_has_add_permission = inline_has_change_permission = inline_has_delete_permission = False
+                formset.extra = formset.max_num = 0
+
+            inline_has_view_permission = inline.has_view_permission(request, obj)
             inline_admin_formset = helpers.InlineAdminFormSet(
-                inline, formset, fieldsets, prepopulated, readonly, model_admin=self,
+                inline, formset, fieldsets, prepopulated, readonly,
+                model_admin=self,
+                has_add_permission=inline_has_add_permission,
+                has_change_permission=inline_has_change_permission,
+                has_delete_permission=inline_has_delete_permission,
+                has_view_permission=inline_has_view_permission,
             )
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
             if hasattr(inline, 'inlines') and inline.inlines:
-                extra_media = self.wrap_nested_inline_formsets(request, inline, formset)
+                extra_media = self.wrap_nested_inline_formsets(
+                    request, inline, formset, not has_change_permission,
+                )
                 if extra_media:
                     media += extra_media
 
+        if self.has_change_permission(request, obj):
+            title = _('Change %s')
+        else:
+            title = _('View %s')
+
         context = {
-            'title': _('Change %s') % force_text(opts.verbose_name),
+            'title': title % force_text(opts.verbose_name),
             'adminform': adminForm,
             'object_id': object_id,
             'original': obj,
@@ -372,6 +422,27 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
         context.update(self.admin_site.each_context(request))
         context.update(extra_context or {})
         return self.render_change_form(request, context, change=True, obj=obj, form_url=form_url)
+
+    def has_view_permission(self, request, obj=None):
+        """
+        Return True if the given request has permission to view the given
+        Django model instance. The default implementation doesn't examine the
+        `obj` parameter.
+        If overridden by the user in subclasses, it should return True if the
+        given request has permission to view the `obj` model instance. If `obj`
+        is None, it should return True if the request has permission to view
+        any object of the given type.
+        """
+        opts = self.opts
+        codename_view = get_permission_codename('view', opts)
+        codename_change = get_permission_codename('change', opts)
+        return (
+            request.user.has_perm('%s.%s' % (opts.app_label, codename_view)) or
+            request.user.has_perm('%s.%s' % (opts.app_label, codename_change))
+        )
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return self.has_view_permission(request, obj) or self.has_change_permission(request, obj)
 
 
 class NestedInline(InlineInstancesMixin, InlineModelAdmin):
