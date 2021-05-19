@@ -6,7 +6,7 @@
     overflow: hidden;
     padding: 8px 12px;
     font-size: 11px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--hairline-color);
 }
 
 .form-row img, .form-row input {
@@ -28,13 +28,13 @@ form h4 {
 
 label {
     font-weight: normal !important;
-    color: #666;
+    color: var(--body-fg);
     font-size: 12px;
 }
 
 .required label, label.required {
     font-weight: bold !important;
-    color: #333 !important;
+    color: var(--body-fg);
 }
 
 /* RADIO BUTTONS */
@@ -140,7 +140,8 @@ fieldset.collapsed h2, fieldset.collapsed {
 }
 
 fieldset.collapsed h2 {
-    color: #999;
+    background: var(--darkened-bg);
+    color: var(--body-quiet-color);
 }
 
 fieldset.collapsed .collapse-toggle {
@@ -159,8 +160,8 @@ fieldset.monospace textarea {
 .submit-row {
     padding: 5px 7px;
     text-align: right;
-    background-color: white;
-    border: 1px solid #ccc;
+    background: var(--darkened-bg);
+    border: 1px solid var(--hairline-color);
     margin: 5px 0;
     overflow: hidden;
 }
@@ -232,7 +233,7 @@ body.popup .submit-row {
 
 .inline-group {
     padding: 0;
-    border: 1px solid #ccc;
+    border: 1px solid var(--darkened-bg);
     margin: 10px 0;
 }
 
@@ -249,8 +250,8 @@ body.popup .submit-row {
     color: #666;
     padding: 3px 5px;
     font-size: 11px;
-    background-color: #e1e1e1;
-    border-bottom: 1px solid #ddd;
+    background: var(--darkened-bg);
+    border-bottom: 1px solid var(--hairline-color);
 }
 
 .inline-related h3 span.delete {
@@ -264,7 +265,7 @@ body.popup .submit-row {
 
 .inline-related fieldset {
     margin: 0;
-    background: #fff;
+    background: var(--body-bg);
     border: none;
 }
 
@@ -274,13 +275,13 @@ body.popup .submit-row {
     font-size: 11px;
     text-align: left;
     font-weight: bold;
-    background: #bcd;
-    color: #fff;
+    background: var(--darkened-bg);
+    color: var(--hairline-color);
 }
 
 .inline-group .tabular > fieldset.module {
     border: none;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--hairline-color);
 }
 
 .inline-related.tabular fieldset.module table {
@@ -314,7 +315,7 @@ body.popup .submit-row {
     overflow: hidden;
     font-size: 9px;
     font-weight: bold;
-    color: #666;
+    color: var(--body-quiet-color);
     _width: 700px;
 }
 
@@ -331,10 +332,10 @@ body.popup .submit-row {
 
 .inline-group div.add-row,
 .inline-group .tabular tr.add-row td {
-    color: #666;
+    color: var(--body-quiet-color);
     padding: 3px 5px;
-    border-bottom: 1px solid #ddd;
-    background-color: #e1e1e1;
+    border-bottom: 1px solid var(--hairline-color);
+    background-color: var(--darkened-bg);
 }
 
 .inline-group .tabular tr.add-row td {
@@ -360,7 +361,7 @@ td > .nested-inline {
 }
 
 .nested-inline-bottom-border {
-	border-bottom: 1px solid #DDDDDD;
+    border-bottom: 1px solid var(--hairline-color);
 }
 
 .no-bottom-border.row1 > td {
