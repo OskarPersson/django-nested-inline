@@ -30,7 +30,7 @@ jobs:
 
       - name: isort
         run: |
-          isort --recursive --check-only --diff
+          isort . --recursive --check-only --diff
 
   build:
     runs-on: ubuntu-latest
