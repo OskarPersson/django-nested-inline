@@ -1,4 +1,4 @@
-{% load i18n admin_static admin_modify %}
+{% load i18n static admin_modify %}
 <div class="inline-group{% if recursive_formset %} {{ recursive_formset.formset.prefix|default:"Root" }}-nested-inline{% if prev_prefix %} {{ prev_prefix }}-{{ loopCounter }}-nested-inline{% endif %} nested-inline{% endif %}" id="{{ inline_admin_formset.formset.prefix }}-group">
 {% with recursive_formset=inline_admin_formset stacked_template='admin/edit_inline/stacked-nested.html' tabular_template='admin/edit_inline/tabular-nested.html'%}
   <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}" id="{{ recursive_formset.formset.prefix }}">
@@ -11,7 +11,7 @@
      {% for field in recursive_formset.fields %}
        {% if not field.widget.is_hidden %}
          <th{% if forloop.first %} colspan="2"{% endif %}{% if field.required %} class="required"{% endif %}>{{ field.label|capfirst }}
-         {% if field.help_text %}&nbsp;<img src="{% static "admin/img/icon-unknown.gif" %}" class="help help-tooltip" width="10" height="10" alt="({{ field.help_text|striptags }})" title="{{ field.help_text|striptags }}" />{% endif %}
+         {% if field.help_text %}&nbsp;<img src="{% static "admin/img/icon-unknown.svg" %}" class="help help-tooltip" width="10" height="10" alt="({{ field.help_text|striptags }})" title="{{ field.help_text|striptags }}" />{% endif %}
          </th>
        {% endif %}
      {% endfor %}

@@ -80,6 +80,14 @@ admin.py
 Changelist
 ----------
 
+0.4.3 - Update media so it expects to find jquery in the right place. (#75)
+
+0.4.2 - Fix assets
+
+0.4.1 - Fix permission checks
+
+0.4.0 - Added support for Django 3.0
+
 0.3.7 - added support for django 1.10, fix unique fieldset id
 
 0.3.6 - added support for django 1.9

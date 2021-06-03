@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 flake8-assertive flake8-bugbear isort
+
+      - name: flake8
+        run: |
+          flake8
+
+      - name: isort
+        run: |
+          isort . --recursive --check-only --diff
+
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        tox_env:
+          - "py27-django18"
+          - "py27-django19"
+          - "py27-django110"
+          - "py27-django111"
+
+          - "py35-django18"
+          - "py35-django19"
+          - "py35-django110"
+          - "py35-django111"
+          - "py35-django20"
+          - "py35-django21"
+          - "py35-django22"
+
+          - "py36-django111"
+          - "py36-django20"
+          - "py36-django21"
+          - "py36-django22"
+          - "py36-django30"
+
+          - "py37-django111"
+          - "py37-django20"
+          - "py37-django21"
+          - "py37-django22"
+          - "py37-django30"
+
+          - "py38-django30"
+
+        include:
+          - python: "2.7"
+            tox_env: "py27-django18"
+          - python: "2.7"
+            tox_env: "py27-django19"
+          - python: "2.7"
+            tox_env: "py27-django110"
+          - python: "2.7"
+            tox_env: "py27-django111"
+
+          - python: "3.5"
+            tox_env: "py35-django18"
+          - python: "3.5"
+            tox_env: "py35-django19"
+          - python: "3.5"
+            tox_env: "py35-django110"
+          - python: "3.5"
+            tox_env: "py35-django111"
+          - python: "3.5"
+            tox_env: "py35-django20"
+          - python: "3.5"
+            tox_env: "py35-django21"
+          - python: "3.5"
+            tox_env: "py35-django22"
+
+          - python: "3.6"
+            tox_env: "py36-django111"
+          - python: "3.6"
+            tox_env: "py36-django20"
+          - python: "3.6"
+            tox_env: "py36-django21"
+          - python: "3.6"
+            tox_env: "py36-django22"
+          - python: "3.6"
+            tox_env: "py36-django30"
+
+          - python: "3.7"
+            tox_env: "py37-django111"
+          - python: "3.7"
+            tox_env: "py37-django20"
+          - python: "3.7"
+            tox_env: "py37-django21"
+          - python: "3.7"
+            tox_env: "py37-django22"
+          - python: "3.7"
+            tox_env: "py37-django30"
+
+          - python: "3.8"
+            tox_env: "py38-django30"
+
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade wheel setuptools
+          pip install tox tox-venv
+
+      - name: Test
+        run: |
+          tox -e ${{ matrix.tox_env }}
