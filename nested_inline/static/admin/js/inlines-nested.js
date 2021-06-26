@@ -101,6 +101,8 @@
                     if (options.removed) {
                         options.removed(formset_to_update);
                     }
+
+                    $(document).trigger('formset:removed', [row, options.prefix]);
                 });
                 if (row.is("tr")) {
                     // If the forms are laid out in table rows, insert
@@ -133,6 +135,8 @@
                     options.added(row);
                 }
                 nextIndex = nextIndex + 1;
+
+                $(document).trigger('formset:added', [row, options.prefix]);
             });
         }
         return this;
