@@ -80,6 +80,8 @@ admin.py
 Changelist
 ----------
 
+0.4.4 - Add formset:added and formset:removed events (#97)
+
 0.4.3 - Update media so it expects to find jquery in the right place. (#75)
 
 0.4.2 - Fix assets
