@@ -31,7 +31,7 @@
 </div>{% endfor %}
 </div>
 
-<script type="text/javascript">
+<script {% if request.csp_nonce %} nonce="{{ request.csp_nonce }}" {% endif %} type="text/javascript">
 (function($) {
     $(document).ready(function() {
         var rows = "#{{ recursive_formset.formset.prefix }}-group .inline-related";
