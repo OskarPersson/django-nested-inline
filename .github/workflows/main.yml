@@ -40,7 +40,6 @@ jobs:
       matrix:
         tox_env:
           - "py35-django22"
-          - "py35-django30"
           - "py36-django22"
           - "py36-django30"
           - "py37-django22"
@@ -52,9 +51,6 @@ jobs:
         include:
           - python: "3.5"
             tox_env: "py35-django22"
-
-          - python: "3.5"
-            tox_env: "py35-django30"
 
           - python: "3.6"
             tox_env: "py36-django30"
