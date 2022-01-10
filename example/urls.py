@@ -9,4 +9,3 @@ if VERSION > (2, 0, 0):
 else:
     from django.conf.urls import url
     urlpatterns.append(url(r'^admin/', admin.site.urls))
-
