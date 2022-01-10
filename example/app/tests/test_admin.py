@@ -1,7 +1,11 @@
+from django import VERSION
 from django.contrib.auth.models import User
 from django.template.response import TemplateResponse
 from django.test import TestCase
-from django.urls import reverse
+if VERSION < (2, 0, 0):
+    from django.core.urlresolvers import reverse
+else:
+    from django.urls import reverse
 
 
 class TopLevelAdminTestCase(TestCase):
