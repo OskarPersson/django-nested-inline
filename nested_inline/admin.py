@@ -10,9 +10,9 @@ from django.forms.formsets import all_valid
 from django.http import Http404
 from django.templatetags.static import static
 from django.utils.decorators import method_decorator
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.html import escape
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_protect
 
 csrf_protect_m = method_decorator(csrf_protect)
@@ -255,7 +255,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
                     media += extra_media
 
         context = {
-            'title': _('Add %s') % force_text(opts.verbose_name),
+            'title': _('Add %s') % force_str(opts.verbose_name),
             'adminform': adminForm,
             'is_popup': "_popup" in request.GET,
             'show_delete': False,
@@ -282,7 +282,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
 
         if obj is None:
             raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {
-                          'name': force_text(opts.verbose_name), 'key': escape(object_id)})
+                          'name': force_str(opts.verbose_name), 'key': escape(object_id)})
 
         if request.method == 'POST' and "_saveasnew" in request.POST:
             return self.add_view(request, form_url=reverse('admin:%s_%s_add' %
@@ -359,7 +359,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
                     media += extra_media
 
         context = {
-            'title': _('Change %s') % force_text(opts.verbose_name),
+            'title': _('Change %s') % force_str(opts.verbose_name),
             'adminform': adminForm,
             'object_id': object_id,
             'original': obj,
