@@ -143,6 +143,8 @@ jobs:
             tox_env: "py38-django32"
           - python: "3.8"
             tox_env: "py38-django40"
+          - python: "3.8"
+            tox_env: "py38-djangomain"
 
           - python: "3.9"
             tox_env: "py39-django30"
@@ -150,11 +152,15 @@ jobs:
             tox_env: "py39-django32"
           - python: "3.9"
             tox_env: "py39-django40"
+          - python: "3.9"
+            tox_env: "py39-djangomain"
 
           - python: "3.10"
             tox_env: "py310-django32"
           - python: "3.10"
             tox_env: "py310-django40"
+          - python: "3.10"
+            tox_env: "py310-djangomain"
 
 
     steps:
