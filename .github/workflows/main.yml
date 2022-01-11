@@ -129,8 +129,6 @@ jobs:
           - python: "3.7"
             tox_env: "py37-django30"
           - python: "3.7"
-            tox_env: "py37-django31"
-          - python: "3.7"
             tox_env: "py37-django32"
 
           - python: "3.8"
@@ -160,7 +158,7 @@ jobs:
 
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - name: Set up Python
         uses: actions/setup-python@v2
