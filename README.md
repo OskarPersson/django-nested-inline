@@ -76,9 +76,27 @@ admin.py
     admin.site.register(TopLevel, TopLevelAdmin)
 
 
+Minifying Javascript
+--------------------
+
+Released versions of this library should have a minified version of the js.
+
+Minification is done with uglifyjs. If npm is installed on your system,
+you can install uglifyjs with the command:
+```sh
+npm install -g uglify-js
+```
+
+Then change to the directory where the file 'inlines-nested.js' and
+run the following command:
+```sh
+uglifyjs --compress --mangle --output ./inlines-nested.min.js -- inlines-nested.js
+```
 
 Changelist
 ----------
+
+0.4.5 - Support django 4.0 and django-csp
 
 0.4.4 - Add formset:added and formset:removed events (#97)
 
