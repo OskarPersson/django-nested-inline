@@ -99,10 +99,12 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
         media = None
 
         def get_media(extra_media):
-            if media:
+            if media and extra_media:
                 return media + extra_media
-            else:
+            elif extra_media:
                 return extra_media
+            else:
+                return media
 
         for form in formset.forms:
             wrapped_nested_formsets = []
