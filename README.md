@@ -93,6 +93,36 @@ run the following command:
 uglifyjs --compress --mangle --output ./inlines-nested.min.js -- inlines-nested.js
 ```
 
+Releasing to PyPi
+-----------------
+
+Create a file at $HOME/.pypirc and put the following text inside:
+
+```txt
+[pypi]
+username = __token__
+password = <Token from pypi>
+```
+
+Make sure the dependencies for this project are installed:
+```sh
+pip install django
+```
+Then install the build tool:
+```sh
+pip install build
+```
+
+Next run the distribution build of the project:
+```sh
+python -m build
+```
+
+Lastly, push the release to pypi
+```sh
+twine upload dist/*
+```
+
 Changelist
 ----------
 
