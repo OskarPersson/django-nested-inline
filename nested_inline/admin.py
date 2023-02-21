@@ -289,7 +289,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
         if request.method == 'POST' and "_saveasnew" in request.POST:
             return self.add_view(request, form_url=reverse('admin:%s_%s_add' %
                                                            (opts.app_label,
-                                                            opts.module_name),
+                                                            opts.model_name),
                                                            current_app=self.admin_site.name))
 
         ModelForm = self.get_form(request, obj)
