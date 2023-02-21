@@ -72,13 +72,18 @@ jobs:
           - "py38-django30"
           - "py38-django32"
           - "py38-django40"
+          - "py38-django41"
 
           - "py39-django30"
           - "py39-django32"
           - "py39-django40"
+          - "py39-django41"
 
           - "py310-django32"
           - "py310-django40"
+          - "py310-django41"
+
+          - "py311-django41"
 
         include:
           - python: "2.7"
@@ -143,6 +148,8 @@ jobs:
             tox_env: "py38-django32"
           - python: "3.8"
             tox_env: "py38-django40"
+          - python: "3.8"
+            tox_env: "py38-django41"
 
           - python: "3.9"
             tox_env: "py39-django30"
@@ -150,11 +157,18 @@ jobs:
             tox_env: "py39-django32"
           - python: "3.9"
             tox_env: "py39-django40"
+          - python: "3.9"
+            tox_env: "py39-django41"
 
           - python: "3.10"
             tox_env: "py310-django32"
           - python: "3.10"
             tox_env: "py310-django40"
+          - python: "3.10"
+            tox_env: "py310-django41"
+
+          - python: "3.11"
+            tox_env: "py311-django41"
 
 
     steps:
