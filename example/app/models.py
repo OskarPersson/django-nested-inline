@@ -1,8 +1,13 @@
 from django.db import models
 
 
+class Foo(models.Model):
+    name = models.CharField(max_length=200)
+
+
 class TopLevel(models.Model):
     name = models.CharField(max_length=200)
+    foos = models.ManyToManyField('Foo')
 
 
 class LevelOne(models.Model):
