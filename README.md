@@ -22,59 +22,60 @@ Usage
 
 Add `nested_inline` to `INSTALLED_APPS`
 
-models.py
+```python
+# models.py
 
-    from django.db import models
+from django.db import models
 
-    class TopLevel(models.Model):
-        name = models.CharField(max_length=200)
+class TopLevel(models.Model):
+    name = models.CharField(max_length=200)
 
-    class LevelOne(models.Model):
-        name = models.CharField(max_length=200)
-        level = models.ForeignKey('TopLevel')
+class LevelOne(models.Model):
+    name = models.CharField(max_length=200)
+    level = models.ForeignKey('TopLevel')
 
-    class LevelTwo(models.Model):
-        name = models.CharField(max_length=200)
-        level = models.ForeignKey('LevelOne')
+class LevelTwo(models.Model):
+    name = models.CharField(max_length=200)
+    level = models.ForeignKey('LevelOne')
 
-    class LevelThree(models.Model):
-        name = models.CharField(max_length=200)
-        level = models.ForeignKey('LevelTwo')
-
-
-admin.py
-
-    from django.contrib import admin
-    from nested_inline.admin import NestedStackedInline, NestedModelAdmin
-    from example.models import *
-
-    class LevelThreeInline(NestedStackedInline):
-        model = LevelThree
-        extra = 1
-        fk_name = 'level'
+class LevelThree(models.Model):
+    name = models.CharField(max_length=200)
+    level = models.ForeignKey('LevelTwo')
 
 
-    class LevelTwoInline(NestedStackedInline):
-        model = LevelTwo
-        extra = 1
-        fk_name = 'level'
-        inlines = [LevelThreeInline]
+# admin.py
+
+from django.contrib import admin
+from nested_inline.admin import NestedStackedInline, NestedModelAdmin
+from example.models import *
+
+class LevelThreeInline(NestedStackedInline):
+    model = LevelThree
+    extra = 1
+    fk_name = 'level'
 
 
-    class LevelOneInline(NestedStackedInline):
-        model = LevelOne
-        extra = 1
-        fk_name = 'level'
-        inlines = [LevelTwoInline]
+class LevelTwoInline(NestedStackedInline):
+    model = LevelTwo
+    extra = 1
+    fk_name = 'level'
+    inlines = [LevelThreeInline]
 
 
-    class TopLevelAdmin(NestedModelAdmin):
-        model = TopLevel
-        inlines = [LevelOneInline]
+class LevelOneInline(NestedStackedInline):
+    model = LevelOne
+    extra = 1
+    fk_name = 'level'
+    inlines = [LevelTwoInline]
 
 
-    admin.site.register(TopLevel, TopLevelAdmin)
+class TopLevelAdmin(NestedModelAdmin):
+    model = TopLevel
+    inlines = [LevelOneInline]
 
+
+admin.site.register(TopLevel, TopLevelAdmin)
+```
 
 Minifying Javascript
 --------------------
