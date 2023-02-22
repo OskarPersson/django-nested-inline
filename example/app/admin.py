@@ -1,7 +1,12 @@
 from django.contrib import admin
 
-from example.app.models import LevelOne, LevelThree, LevelTwo, TopLevel
+from example.app.models import Foo, LevelOne, LevelThree, LevelTwo, TopLevel
 from nested_inline.admin import NestedModelAdmin, NestedStackedInline
+
+
+class FooAdmin(admin.ModelAdmin):
+    model = Foo
+    search_fields = ['name']
 
 
 class LevelThreeInline(NestedStackedInline):
@@ -27,6 +32,8 @@ class LevelOneInline(NestedStackedInline):
 class TopLevelAdmin(NestedModelAdmin):
     model = TopLevel
     inlines = [LevelOneInline]
+    autocomplete_fields = ['foos']
 
 
+admin.site.register(Foo, FooAdmin)
 admin.site.register(TopLevel, TopLevelAdmin)
