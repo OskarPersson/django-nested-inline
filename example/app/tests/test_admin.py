@@ -43,3 +43,8 @@ class TopLevelAdminTestCase(TestCase):
         response = self.client.get(reverse('admin:app_toplevel_add'))
         self.assertIsInstance(response, TemplateResponse)
         self.assertEqual(response.status_code, 200)
+
+    def test_add_view_with_missing_initial_field(self):
+        response = self.client.get(reverse('admin:app_toplevel_add'), {'foo': 'bar'})
+        self.assertIsInstance(response, TemplateResponse)
+        self.assertEqual(response.status_code, 200)
