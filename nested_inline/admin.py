@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.admin import helpers
 from django.contrib.admin.options import InlineModelAdmin, reverse
 from django.contrib.admin.utils import unquote
-from django.core.exceptions import PermissionDenied, FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, PermissionDenied
 from django.db import models, transaction
 from django.forms.formsets import all_valid
 from django.http import Http404
