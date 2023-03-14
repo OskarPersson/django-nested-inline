@@ -127,6 +127,15 @@ twine upload dist/*
 Changelist
 ----------
 
+0.4.6:
+
+* Support django 4.1
+* Fix inline media error (#130)
+* Fix error when using 'save as new' (#149)
+* Add .fieldBox styling for django 2.1+ (#114)
+* Fix select2 import for Django >=2.2 (#150)
+* Fixed FieldDoesNotExist import to support Django>=3.2 (#147)
+
 0.4.5 - Support django 4.0 and django-csp
 
 0.4.4 - Add formset:added and formset:removed events (#97)

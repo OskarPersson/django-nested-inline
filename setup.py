@@ -10,6 +10,7 @@ setup(
     version='.'.join(str(v) for v in __version__),
     description='Recursive nesting of inline forms for Django Admin',
     long_description=long_desc,
+    long_description_content_type='text/markdown',
     url=github_url,
     author='Josh Rowe',
     author_email='josh@s-block.com',
