@@ -20,7 +20,8 @@ csrf_protect_m = method_decorator(csrf_protect)
 
 class InlineInstancesMixin():
     def get_inline_instances(self, request, obj=None):
-        inline_instances = []
+        inline_instances = super(
+            NestedModelAdmin, self).get_inline_instances(request, obj)
         for inline_class in self.inlines:
             inline = inline_class(self.model, self.admin_site)
             if request:
@@ -79,7 +80,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
             raise Exception("Maximum nesting depth reached (5)")
         for form in formset.forms:
             nested_formsets = []
-            for nested_inline in inline.get_inline_instances(request):
+            for nested_inline in inline.get_inline_instances(request, form.instance):
                 InlineFormSet = nested_inline.get_formset(request, form.instance)
                 prefix = "%s-%s" % (form.prefix, InlineFormSet.get_default_prefix())
 
@@ -108,7 +109,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
 
         for form in formset.forms:
             wrapped_nested_formsets = []
-            for nested_inline, nested_formset in zip(inline.get_inline_instances(request), form.nested_formsets):
+            for nested_inline, nested_formset in zip(inline.get_inline_instances(request, form.instance), form.nested_formsets):
                 if form.instance.pk:
                     instance = form.instance
                 else:
@@ -410,7 +411,7 @@ class NestedInline(InlineInstancesMixin, InlineModelAdmin):
         return forms.Media(js=[static('admin/js/%s' % url) for url in js])
 
     def get_formsets_with_inlines(self, request, obj=None):
-        for inline in self.get_inline_instances(request):
+        for inline in self.get_inline_instances(request, obj):
             yield inline.get_formset(request, obj), inline
 
 
