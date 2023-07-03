@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.admin import helpers
 from django.contrib.admin.options import InlineModelAdmin, reverse
 from django.contrib.admin.utils import unquote
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import FieldDoesNotExist, PermissionDenied
 from django.db import models, transaction
 from django.forms.formsets import all_valid
 from django.http import Http404
@@ -214,7 +214,7 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
             for k in initial:
                 try:
                     f = opts.get_field(k)
-                except models.FieldDoesNotExist:
+                except FieldDoesNotExist:
                     continue
                 if isinstance(f, models.ManyToManyField):
                     initial[k] = initial[k].split(",")
@@ -389,7 +389,7 @@ class NestedInline(InlineInstancesMixin, InlineModelAdmin):
             js.extend(['urlify.js', 'prepopulate%s.js' % extra])
         if self.filter_vertical or self.filter_horizontal:
             js.extend(['SelectBox.js', 'SelectFilter2.js'])
-        return forms.Media(js=['admin/js/%s' % url for url in js])
+        return forms.Media(js=[static('admin/js/%s' % url) for url in js])
 
     def get_formsets_with_inlines(self, request, obj=None):
         for inline in self.get_inline_instances(request):
