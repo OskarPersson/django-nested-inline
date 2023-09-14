@@ -407,6 +407,8 @@ class NestedInline(InlineInstancesMixin, InlineModelAdmin):
             js.extend(['urlify.js', 'prepopulate%s.js' % extra])
         if self.filter_vertical or self.filter_horizontal:
             js.extend(['SelectBox.js', 'SelectFilter2.js'])
+        if self.classes and 'collapse' in self.classes:
+            js.append('collapse%s.js' % extra)
         return forms.Media(js=[static('admin/js/%s' % url) for url in js])
 
     def get_formsets_with_inlines(self, request, obj=None):
