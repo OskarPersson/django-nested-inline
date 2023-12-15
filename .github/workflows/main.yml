@@ -39,11 +39,6 @@ jobs:
       fail-fast: false
       matrix:
         tox_env:
-          - "py27-django18"
-          - "py27-django19"
-          - "py27-django110"
-          - "py27-django111"
-
           - "py35-django18"
           - "py35-django19"
           - "py35-django110"
@@ -86,15 +81,6 @@ jobs:
           - "py311-django41"
 
         include:
-          - python: "2.7"
-            tox_env: "py27-django18"
-          - python: "2.7"
-            tox_env: "py27-django19"
-          - python: "2.7"
-            tox_env: "py27-django110"
-          - python: "2.7"
-            tox_env: "py27-django111"
-
           - python: "3.5"
             tox_env: "py35-django18"
           - python: "3.5"
