@@ -52,7 +52,10 @@ class NestedModelAdmin(InlineInstancesMixin, admin.ModelAdmin):
         css = {
             "all": ('admin/css/forms-nested.css',)
         }
-        js = ('admin/js/inlines-nested%s.js' % ('' if settings.DEBUG else '.min'),)
+        js = (
+            'admin/js/jquery.init.js',
+            'admin/js/inlines-nested%s.js' % ('' if settings.DEBUG else '.min'),
+        )
 
     def save_formset(self, request, form, formset, change):
         """
